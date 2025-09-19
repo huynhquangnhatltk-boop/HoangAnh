@@ -1,7 +1,13 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta http-equiv="refresh" content="0; url=/" />
+    <meta charset="utf-8">
+    <title>Redirecting...</title>
+    <script type="text/javascript">
+      // Lấy đường dẫn hiện tại (VD: /cart, /orders)
+      var redirectTo = window.location.protocol + '//' + window.location.host + '/HoangAnh/' + window.location.pathname.replace('/HoangAnh','');
+      window.location.replace(redirectTo);
+    </script>
   </head>
   <body>
     <p>Redirecting...</p>
