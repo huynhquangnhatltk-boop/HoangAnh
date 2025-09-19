@@ -1,0 +1,5 @@
+body { margin:0; background:#f7f7f7; color:#222; }
+.container { background:#fff; min-height:calc(100vh - 70px); padding:24px; }
+a { color: #3b82f6; text-decoration:none; }
+button { padding:6px 10px; border:1px solid #ccc; background:#fff; border-radius:6px; }
+input { padding:6px; }
