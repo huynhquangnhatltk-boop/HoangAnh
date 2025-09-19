@@ -173,7 +173,7 @@ function updatePrice(it) {
   const printCart = async () => {
   try {
     // Load file mẫu từ public/form.xlsx
-    const res = await fetch("/form.xlsx");
+    const res = await fetch(`${import.meta.env.BASE_URL}form.xlsx`);
     const arrayBuffer = await res.arrayBuffer();
 
     // Mở workbook từ ArrayBuffer (không dùng Buffer)
