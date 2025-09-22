@@ -1,10 +1,10 @@
 <template>
   <section class="p-6">
-    <h1 class="text-2xl font-bold mb-2">Chào mừng đến cửa hàng demo</h1>
-    <p class="mb-4">Ở đây có mục bán hàng mẫu — bạn có thể duyệt sản phẩm, xem chi tiết và thêm vào giỏ.</p>
+    <h1 class="text-2xl font-bold mb-2">VLXD HOÀNG ANH</h1>
       
     <p> <strong>Tìm kiếm sản phẩm:</strong>
-      <input type="text" v-model="search" placeholder="Nhập tên sản phẩm">
+      <input type="text" v-model="search" 
+            placeholder="Nhập tên sản phẩm">
     </p>
 
     <h2 style="display: flex; justify-content: space-between;"> 
@@ -62,14 +62,11 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import axios from 'axios';
-
-
+import { API_URL } from '../config'
 
 const showPopup = ref(null);
 const newProduct = ref({});
-
 const products = ref([]);
-const editingProduct = ref({});
 const kt = ref(false);
 
 /////////////Tìm kiếm sản phẩm/////////////////
@@ -96,9 +93,9 @@ const Sua = (product) => {
 
 //Sửa sản phẩm
 const saveEdit = async () => {
-  if (!confirm('Bạn có muốn sua sản phẩm này')) return
+  if (!confirm('Bạn có muốn sửa sản phẩm này')) return
   try {
-    await axios.put(`http://localhost:3000/products/${newProduct.value.id}`,newProduct.value);
+    await axios.put(`${API_URL}/products/${newProduct.value.id}`,newProduct.value);
     const idx = products.value.findIndex(p => p.id === newProduct.value.id);
     if (idx > -1) {
       // Thay thế sản phẩm cũ trong mảng bằng bản mới (editingProduct)
@@ -118,7 +115,7 @@ const formatPrice = (v) => new Intl.NumberFormat('vi-VN').format(v*1000) + '₫'
 // Lấy danh sách sản phẩm từ server khi component mount
 onMounted(async () => {
   try {
-    const res = await axios.get('http://localhost:3000/products');
+    const res = await axios.get(`${API_URL}/products`);
     products.value = res.data;
   } catch (err) {
     console.error('Lỗi khi lấy dữ liệu từ database:', err);
@@ -134,7 +131,7 @@ const addProduct = async () => {
   }
   try {
     // Gửi POST lên server
-    const res = await axios.post('http://localhost:3000/products', newProduct.value);
+    const res = await axios.post(`${API_URL}/products`, newProduct.value);
     // Cập nhật danh sách local
     products.value.push(res.data);
     // Reset form và đóng popup
@@ -151,7 +148,7 @@ const Xoa = async (id) => {
   console.log(id);
   if (!confirm('Bạn có muốn xoá sản phẩm này')) return
   try {
-    await axios.delete(`http://localhost:3000/products/${id}`)
+    await axios.delete(`${API_URL}/products/${id}`)
     products.value = products.value.filter(p => p.id !== id)
   } catch (err) {
     console.error(err)
@@ -159,9 +156,9 @@ const Xoa = async (id) => {
   }
 };
 
-
-
 </script>
+
+
 
 <style>
 .grid { display:grid; 

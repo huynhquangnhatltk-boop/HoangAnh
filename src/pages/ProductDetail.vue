@@ -37,7 +37,7 @@
   });
   
   const addToCart = () => {
-    add(product, qty.value);
+    add(product.value, qty.value);
     router.push('/cart');
   };
   

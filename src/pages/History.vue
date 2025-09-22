@@ -66,6 +66,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
+import { API_URL } from '../config'
 
 const orders = ref([]);
 const dailyRevenue = ref([]);
@@ -77,7 +78,7 @@ const formatPrice = (v) => new Intl.NumberFormat('vi-VN').format(v) + '₫';
 
 onMounted(async () => {
   try {
-    const res = await axios.get('http://localhost:3000/orders');
+    const res = await axios.get(`${API_URL}/orders`);
     orders.value = res.data;
     
 
@@ -94,7 +95,7 @@ onMounted(async () => {
       dailyMap[day].total += parseFloat(o.total);
     });
     dailyRevenue.value = Object.entries(dailyMap).map(([date,val])=>({date,...val}))
-      .sort((a,b)=> a.date.localeCompare(b.date));
+      .sort((a,b)=> a.date.localeCompare(a.date));
 
     // Doanh thu theo tháng
     const monthMap = {};
@@ -105,7 +106,7 @@ onMounted(async () => {
       monthMap[month].total += parseFloat(o.total);
     });
     monthlyRevenue.value = Object.entries(monthMap).map(([month,val])=>({month,...val}))
-      .sort((a,b)=> a.month.localeCompare(b.month));
+      .sort((a,b)=> a.month.localeCompare(a.month));
 
   } catch(err) {
     console.error('Lỗi lấy dữ liệu đơn hàng:', err);

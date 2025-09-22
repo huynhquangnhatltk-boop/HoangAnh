@@ -92,7 +92,7 @@ app.delete('/products/:id', async (req, res) => {
 /////////////////////BE CHI TIẾT ĐƠN HÀNG//////////////////////////////////////////////
 app.get('/orders', async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM orders ORDER BY date ASC');
+    const result = await pool.query('SELECT * FROM orders ORDER BY date DESC');
     res.json(result.rows);
   } catch (err) {
     console.error(err);
@@ -134,6 +134,7 @@ app.get('/orders/:id', async (req, res) => {
 app.post('/orders', async (req,res) => {
   try {
     const { ten, sdt, total, date, items } = req.body;
+
     const result = await pool.query(
       'INSERT INTO orders(ten, sdt, total, date) VALUES($1, $2, $3, $4) RETURNING *',
       [ten, sdt, total, date]
@@ -142,9 +143,16 @@ app.post('/orders', async (req,res) => {
     const orderId = result.rows[0].id;
     for (let it of items) {
       await pool.query(
-        `INSERT INTO order_items (order_id, title, qty, price) 
-         VALUES ($1, $2, $3, $4)`,
-        [orderId, it.title, it.qty, it.price]
+        `INSERT INTO order_items (order_id, nt, title, description, qty, price) 
+         VALUES ($1, $2, $3, $4, $5, $6)`,
+        [orderId, it.nt, it.title, it.description, it.qty, it.price]
+      );  
+      
+      await pool.query(
+        `UPDATE products
+         SET stock = stock - $1
+         WHERE id = $2`,
+        [it.qty, it.id]
       );
     }
 

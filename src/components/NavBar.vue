@@ -1,6 +1,6 @@
 <template>
     <nav class="nav">
-      <router-link to="/">Trang chủ</router-link>
+      <router-link to="/">Kho hàng</router-link>
       <router-link to="/shop">Bán hàng</router-link>
       <router-link to="/about">Giới thiệu</router-link>
       <router-link to="/cart">Giỏ hàng ({{ totalQty }})</router-link>

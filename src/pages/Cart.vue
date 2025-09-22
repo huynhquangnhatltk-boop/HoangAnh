@@ -7,6 +7,7 @@
       <div v-if="items.length">
         <table>
           <thead><tr>
+            <th style="width: 10mm;"> N/T</th>
             <th style="width: 50mm;"> Sản phẩm</th>
             <th style="width: 10mm;"> Đvt</th>
             <th style="width: 20mm;">Số lượng</th>
@@ -14,8 +15,13 @@
             <th style="width: 40mm;">Thành tiền</th>
             <th style="width: 10mm;'"></th>
           </tr></thead>
+
           <tbody>
             <tr v-for="(it) in items" :key="it.id">
+              <td> <input type="text" v-model="it.nt"
+                  class="hidden-input"/> 
+              </td>
+
               <td>
                 <input type="text" v-model="it.title" 
                       placeholder="Nhập sản phẩm"
@@ -26,7 +32,7 @@
               </td>
 
               <td>
-                <input type="text" v-model.text="it.description"
+                <input type="text" v-model="it.description"
                 ref="desInputs"
                 class="hidden-input">
               </td> 
@@ -37,7 +43,7 @@
                 class="hidden-input" style="width:70px"/>
               </td>
 
-              <td> <input type="text" v-model="it.priceStr"
+              <td> <input type="text" v-model="it.price"
                 @blur= updatePrice(it)
                 class="hidden-input"/>
               </td>
@@ -63,10 +69,11 @@
     </section>
   </template>
 
-  <script setup>
+<script setup>
   import { useCart } from '../store/cart';
   import { useRouter } from 'vue-router';
-  import { ref, nextTick, onMounted, onUnmounted } from 'vue';
+  import { ref, nextTick, onMounted, onUnmounted} from 'vue';
+  import { API_URL} from '../config'
   import axios from 'axios';
   import XlsxPopulate from "xlsx-populate/browser/xlsx-populate";
 
@@ -84,30 +91,35 @@
   const customName = ref('');
   const customPhone = ref('');
 
-  onMounted(async () => {
-    const res = await axios.get('http://localhost:3000/products'); // backend bạn
-    products.value = res.data;
-    window.addEventListener('keydown', onKey);
-  });
+onMounted(async () => {
+  const res = await axios.get(`${API_URL}/products`); // backend bạn
+  products.value = res.data;
+  window.addEventListener('keydown', onKey);
+  const saved = localStorage.getItem("cart");
+    if (saved) {
+    state.items.splice(0, state.items.length, ...JSON.parse(saved));
+  }
+});
 
-  onUnmounted(() => {
-    window.removeEventListener('keydown', onKey);
-  });
+onUnmounted(() => {
+  window.removeEventListener('keydown', onKey);
+});
 
-  const onKey = (e) => {
-    if (e.key === '`') {
-      e.preventDefault();
-      addItem();
-    }
-  };
+const onKey = (e) => {
+  if (e.key === '`') {
+    e.preventDefault();
+    addItem();
+  }
+};
+
+
 
   const selectProduct = (it) => {
     const p = products.value.find(pr => pr.title.toLowerCase() === it.title.toLowerCase());
     if (p) {
-      it.id =  Date.now();
+      it.id =  p.id;
       it.price = p.price;
       it.description = p.description
-      it.priceStr = p.price;
       nextTick(() => {
          qtyInputs.value[titleInputs.value.length - 1]?.focus();
       });
@@ -138,10 +150,8 @@ const formatPrice = (v) => new Intl.NumberFormat('vi-VN').format(v);
 
 
 function updatePrice(it) {
-  // parse string thành số, nhân 1000 nếu muốn
-  const value = parseFloat(it.priceStr);
-  it.price = value;                // lưu number để tính toán
-  it.priceStr = formatPrice(value * 1000); // hiển thị string
+  it.price = parseFloat(it.price);      
+  it.price = it.price.toFixed(3);  
 }
 
 
@@ -153,14 +163,16 @@ function updatePrice(it) {
         total: total.value,
         date: new Date().toLocaleString('sv-SE', { timeZone: 'Asia/Ho_Chi_Minh' }),
         items: items.map(it =>({
-         // product_id: it.id,   Trừ hàng kho
+          id: it.id,   //Trừ hàng kho 
+          nt: it.nt,
           title: it.title,
+          description: it.description,
           qty: Number(it.qty) || 0,
-          price: Number(it.price) || 0 
+          price: Number(it.price) || 0 ,
         }))
     };
     console.log(orderData);
-    const res = await axios.post('http://localhost:3000/orders', orderData);
+    await axios.post(`${API_URL}/orders`, orderData);
 
     alert('Cảm ơn bạn! (demo) Tổng: ' + formatPrice(total.value));
     clear();
@@ -207,12 +219,12 @@ function updatePrice(it) {
       }
     });
 
+      sheet.cell(`B${row}`).value(it.nt);
       sheet.cell(`C${row}`).value(it.title);
       sheet.cell(`D${row}`).value(it.description);
       sheet.cell(`E${row}`).value(it.qty);
       sheet.cell(`F${row}`).value(Number(it.price));
       sheet.cell(`G${row}`).formula(`=F${row}*E${row}`);
-      //sheet.cell(`F${row}`).value((Number(it.price) || 0) * (Number(it.qty) || 0));
     });
 
     const totalRow = startRow + items.length;

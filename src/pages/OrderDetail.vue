@@ -29,6 +29,7 @@
   <script setup>
   import { ref, onMounted } from 'vue'
   import { useRoute } from 'vue-router'
+  import { API_URL } from '../config'
   import axios from 'axios'
   
   const route = useRoute()
@@ -38,7 +39,7 @@
   
   onMounted(async () => {
     try {
-      const res = await axios.get(`http://localhost:3000/orders/${route.params.id}`)
+      const res = await axios.get(`${API_URL}/orders/${route.params.id}`)
       order.value = res.data
     } catch (err) {
       console.error('Không lấy được đơn hàng:', err)  

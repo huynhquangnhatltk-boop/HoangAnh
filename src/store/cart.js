@@ -1,14 +1,27 @@
-import { reactive, computed } from 'vue';
+import { reactive, computed, watch } from 'vue';
 
 const state = reactive({
   items: [] // { id, title, price, qty }
 });
+
+watch(
+  () => state.items,
+  (val) => {
+    localStorage.setItem("cart", JSON.stringify(val));
+  },
+  { deep: true }
+);
+
 
 export function useCart() {
   const add = (product, qty = 1) => {
     const found = state.items.find(i => i.id === product.id);
     if (found) found.qty += qty;
     else state.items.push({ id: product.id, title: product.title, price: product.price, qty });
+  };
+
+  const edit = (product) => {
+    state.items.push({ ...product });
   };
 
   const remove = (id) => {
@@ -25,5 +38,5 @@ export function useCart() {
 
   const clear = () => state.items.splice(0);
   const total = computed(() => state.items.reduce((s, i) => s + i.price * i.qty * 1000, 0));
-  return { state, add, remove, updateQty, clear, total };
+  return { state, edit,  add, remove, updateQty, clear, total };
 }

@@ -67,7 +67,15 @@
   
 <script setup>
 import { ref, computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import axios from 'axios';
+import { useCart } from '../store/cart';
+import { API_URL } from '../config'; 
+const router = useRouter()
+
+
+const {edit} =useCart();
+
   
 const orders = ref([]);
 const editingOrder = ref(null);  
@@ -92,22 +100,27 @@ const formatDate = (dateStr) => {
   
 onMounted(async () => {
   try {
-    const res = await axios.get('http://localhost:3000/orders');
+    const res = await axios.get(`${API_URL}/orders`);
     orders.value = res.data;
   } catch (err) {
     console.error('Lỗi khi lấy dữ liệu từ database:', err);
   }
 });
 
+//////////////////////////////////////////
 const editOrder = async (id) => {
-    const res = await axios.get(`http://localhost:3000/orders/${id}`);
+    const res = await axios.get(`${API_URL}/orders/${id}`);
     editingOrder.value = res.data;
+    editingOrder.value.items.forEach(it => edit(it)); // thêm vào items bên card
+    router.push('/cart'); 
+    console.log(editingOrder.value.items);
 };
+////////////////////////////////////
 
     const deleteOrder = async (id) => { 
         if (!confirm('Bạn có muốn xoá sản phẩm này')) return
         try {
-            const res = await axios.delete(`http://localhost:3000/orders/${id}`);
+            const res = await axios.delete(`${API_URL}/orders/${id}`);
             orders.value = orders.value.filter(order => order.id !== id);
             alert('Xoá đơn thành công!');
         } catch (error) {
@@ -130,7 +143,7 @@ const editOrder = async (id) => {
   
   const saveOrder = async () => {
     const { id, customer_name, phone, items } = editingOrder.value;
-    await axios.put(`http://localhost:3000/orders/${id}`, {
+    await axios.put(`${API_URL}/orders/${id}`, {
       customer_name, phone, items, total: orderTotal.value
     });
     alert('Đã lưu đơn hàng');
